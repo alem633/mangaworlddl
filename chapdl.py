@@ -45,7 +45,7 @@ def parse_links(pages, ext):
         if (url_ok(next_link)):
             pages.append(next_link) 
             i += 1
-            print(i)
+            print("Parsing chapter " + str(i))
             continue
 
         if ext == ".jpg":
@@ -54,7 +54,7 @@ def parse_links(pages, ext):
             if (url_ok(alternative_next_link)):
                 pages.append(alternative_next_link) 
                 i += 1
-                print(i)
+                print("Parsing chapter " + str(i))
                 continue
 
         if ext == ".png":
@@ -63,7 +63,7 @@ def parse_links(pages, ext):
             if (url_ok(alternative_next_link)):
                 pages.append(alternative_next_link) 
                 i += 1
-                print(i)
+                print("Parsing chapter " + str(i))
                 continue
 
         break
