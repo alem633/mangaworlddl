@@ -1,7 +1,7 @@
 # Dipendenze
 
 - beautifulsoup4 (bs4) (python package)
-- img2pdf
+- img2pdf (optional)
 - make
 
 # Usage
