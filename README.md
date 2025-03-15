@@ -1,4 +1,4 @@
-# Dipendenze
+# Dependencies
 
 - beautifulsoup4 (bs4) (python package)
 - img2pdf (optional)
