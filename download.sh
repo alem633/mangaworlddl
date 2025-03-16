@@ -23,7 +23,7 @@ make clean
 if [ -n "$2" ]; then
     cd download
     sorted_files=$(ls -v *.png)  
-    img2pdf -o "$2" $sorted_files  
+    magick $sorted_files "$2"   
     rm *.png
     cd ..
 fi
