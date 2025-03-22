@@ -11,7 +11,7 @@ make
 
 ./mangaworlddl $1
 rm -rf download
-mkdir download
+mkdir -p download
 
 while IFS= read -r url; do
     wget -O "download/$counter.png" "$url"
@@ -21,7 +21,7 @@ done < output.txt
 make clean
 
 if [ -n "$2" ]; then
-    cd download
+    cd download || exit 1
     sorted_files=$(ls -v *.png)  
     magick $sorted_files "$2"   
     rm *.png
