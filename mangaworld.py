@@ -1,11 +1,15 @@
 import sys
 import os
+import re
 import requests
 from bs4 import BeautifulSoup
+from PIL import Image
+from collections import defaultdict
+
 
 if len(sys.argv) < 2:
     print("missing args")
-    print(sys.argv[0] + "[search query]")
+    print(sys.argv[0] + " [search query]")
     sys.exit(1)
 
 query = sys.argv[1]
@@ -72,7 +76,7 @@ def get_pages(chapter):
     soup = BeautifulSoup(response.text, 'html.parser')
     for image in soup.find_all('img', class_='img-fluid'):
         src = image.get('src')
-        if "capitolo" in src:
+        if "volume" in src:
             first_page = src
     max_page = soup.find_all('option', value='0')[0].get_text()
     max_page = max_page[max_page.rfind('/') + 1:]
@@ -93,30 +97,57 @@ def download_page(pages, chapter, volume):
                 print(f"✅ Downloaded: {filename}")
                 continue  
 
-            # Try with alternative ext.
-            print(f"⚠️ Error for {url}: {response.status_code}")
             print("🔁 Trying alternative url...")
-
             if url.endswith('.png'):
                 alt_url = url[:-4] + '.jpg'
-                alt_filename = filename.replace('.png', '.jpg')
             elif url.endswith('.jpg'):
                 alt_url = url[:-4] + '.png'
-                alt_filename = filename.replace('.png', '.jpg')  # fallback
             else:
                 print("unable to change ext.")
                 continue
 
             alt_response = requests.get(alt_url)
             if alt_response.status_code == 200:
-                with open(alt_filename, 'wb') as f:
+                with open(filename, 'wb') as f:
                     f.write(alt_response.content)
-                print(f"✅ Downloaded alternative: {alt_filename}")
+                print(f"✅ Downloaded alternative: {filename}")
             else:
                 print(f"❌ Alternative failed for {alt_url}: {alt_response.status_code}")
 
         except Exception as e:
             print(f"❌ Exception for {url}: {e}")
+
+def convert_to_pdf():
+    input_folder = os.getcwd()
+
+    pattern = re.compile(r"volume(\d+)_chapter(\d+)_(\d+)\.png")
+
+    volumi = defaultdict(list)
+
+    for filename in os.listdir(input_folder):
+        if filename.endswith(".png"):
+            match = pattern.match(filename)
+            if match:
+                volume, chapter, page = map(int, match.groups())
+                filepath = os.path.join(input_folder, filename)
+                volumi[volume].append((chapter, page, filepath))
+
+    for volume, immagini in volumi.items():
+        immagini.sort()
+
+        immagini_caricate = [Image.open(f).convert("RGB") for _, _, f in immagini]
+
+        if immagini_caricate:
+            output_path = os.path.join(input_folder, f"volume{volume}.pdf")
+            immagini_caricate[0].save(output_path, save_all=True, append_images=immagini_caricate[1:])
+            print(f"Made {output_path}")
+
+    for filename in os.listdir(input_folder):
+        if filename.endswith(".png") and pattern.match(filename):
+            os.remove(os.path.join(input_folder, filename))
+            print(f"Deleted {filename}")
+
+
 
 
 # MAIN
@@ -150,3 +181,4 @@ for volume in volumes_with_pages:
         i += 1
     j += 1
 
+convert_to_pdf()
